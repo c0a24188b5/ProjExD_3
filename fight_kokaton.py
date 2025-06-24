@@ -8,6 +8,7 @@ import pygame as pg
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
 NUM_OF_BOMBS = 5  # 爆弾の数
+NUM_OF_BEAMS = 0  # ビームの数
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -177,7 +178,8 @@ def main():
     # for _ in range(NUM_OF_BOMBS):
     #     bombs.append(Bomb((255, 0, 0), 10))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
-    beam = None  # ゲーム初期化時にはビームは存在しない
+    # beam = None  # ゲーム初期化時にはビームは存在しない
+    beams = []  # ビーム用の空リスト
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -186,7 +188,8 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beam = Beam(bird)
+                beams.append(beam)            
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -201,20 +204,23 @@ def main():
                 return
         
         for i, bomb in enumerate(bombs):
-            if beam is not None:
-                if beam.rct.colliderect(bomb.rct):  # ビームと爆弾が衝突したら
-                    beam = None
-                    bombs[i] = None
-                    bird.change_img(6, screen)
-                    score.update(1,screen)
+            for j, beam in enumerate(beams):
+                if beam != None:
+                    if beam.rct.colliderect(bomb.rct):  # ビームと爆弾が衝突したら
+                        beams[j] = None
+                        bombs[i] = None
+                        bird.change_img(6, screen)
+                        score.update(1,screen)
         
         score.update(0, screen)
         
         bombs = [bomb for bomb in bombs if bomb is not None]
+        beams = [beam for beam in beams if beam is not None]
+        beams = [beam for beam in beams if check_bound(beam.rct) == (True,True)]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if beam is not None:  # ビームが存在するときだけ
+        for beam in beams:  # ビームが存在するときだけ
             beam.update(screen)   
         for bomb in bombs:
             bomb.update(screen)
