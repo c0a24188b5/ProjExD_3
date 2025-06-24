@@ -141,11 +141,37 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self, screen:pg.Surface):
+        """
+        撃ち落とした爆弾の個数をカウントするテキストを作る
+        """
+        self.score = 0
+        self.fonto = pg.font.SysFont("hgp創英角ポップ体", 30)
+        self.img = self.fonto.render(f"score : {self.score}", 0, (0, 0, 255))
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50)
+        screen.blit(self.img, self.rct)
+
+    def update(self,num:int, screen:pg.Surface):
+        """
+        スコアを貼る
+        引数：得た得点、画面surface
+        """
+        self.score += num
+        self.img = self.fonto.render(f"score : {self.score}", 0, (0, 0, 255))
+        screen.blit(self.img, self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
+    score = Score(screen)
     # bomb = Bomb((255, 0, 0), 10)
     # bombs = []  # 爆弾用の空リスト
     # for _ in range(NUM_OF_BOMBS):
@@ -169,7 +195,7 @@ def main():
                 bird.change_img(8, screen)
                 fonto = pg.font.Font(None, 80)
                 txt = fonto.render("Game Over", True, (255, 0, 0))
-                screen.blit(txt, [WIDTH//2, HEIGHT//2])
+                screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
                 pg.display.update()
                 time.sleep(2)
                 return
@@ -180,6 +206,9 @@ def main():
                     beam = None
                     bombs[i] = None
                     bird.change_img(6, screen)
+                    score.update(1,screen)
+        
+        score.update(0, screen)
         
         bombs = [bomb for bomb in bombs if bomb is not None]
 
