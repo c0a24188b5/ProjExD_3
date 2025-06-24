@@ -166,6 +166,25 @@ class Score:
         self.img = self.fonto.render(f"score : {self.score}", 0, (0, 0, 255))
         screen.blit(self.img, self.rct)
 
+    
+class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
+    def __init__(self):
+        self.img0 = pg.image.load("fig/explosion.gif")
+        self.img = pg.transform.flip(self.img0, True, True)
+        self.imgs = [self.img0, self.img]
+        self.life = 30
+
+    def update(self, screen:pg.Surface, xy:tuple[int, int]):
+        self.life -= 1
+        if self.life > 0:
+            self.img1 = self.imgs[self.life % 2]
+            self.rct = self.img1.get_rect()
+            self.rct.center = xy
+            screen.blit(self.img1, self.rct)
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -180,6 +199,8 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     # beam = None  # ゲーム初期化時にはビームは存在しない
     beams = []  # ビーム用の空リスト
+    explosion = None
+    explosions = []  # 爆発エフェクト用の空リスト
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -208,15 +229,22 @@ def main():
                 if beam != None:
                     if beam.rct.colliderect(bomb.rct):  # ビームと爆弾が衝突したら
                         beams[j] = None
+                        xy = bombs[i].rct.center
                         bombs[i] = None
                         bird.change_img(6, screen)
                         score.update(1,screen)
+                        explosion = Explosion()
+                        explosions.append(explosion)
         
         score.update(0, screen)
         
         bombs = [bomb for bomb in bombs if bomb is not None]
         beams = [beam for beam in beams if beam is not None]
         beams = [beam for beam in beams if check_bound(beam.rct) == (True,True)]
+        explosions = [explosion for explosion in explosions if explosion.life > 0]
+
+        if explosion is not None:
+            explosion.update(screen, xy)
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
