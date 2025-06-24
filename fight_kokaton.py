@@ -178,6 +178,9 @@ class Explosion:
         self.life = 30
 
     def update(self, screen:pg.Surface, xy:tuple[int, int]):
+        """
+        引数：screen:画面Surface、爆発エフェクトを描画する座標
+        """
         self.life -= 1
         if self.life > 0:
             self.img1 = self.imgs[self.life % 2]
